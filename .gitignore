@@ -1,0 +1,25 @@
+# Compiled executable
+ft_script
+
+# Object files
+*.o
+obj/
+
+# Output files
+typescript
+*.txt
+test_output/
+
+# Temporary files
+*~
+*.swp
+*.swo
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
