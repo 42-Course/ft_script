@@ -2,6 +2,10 @@
 
 The `script` command makes a typescript of everything displayed on your terminal. This implementation demonstrates:
 
+---
+
+### Docs available here https://42-course.github.io/ft_script/html/
+
 ### Command-Line Options
 
 ```
