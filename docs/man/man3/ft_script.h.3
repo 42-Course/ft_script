@@ -1,0 +1,674 @@
+.TH "include/ft_script.h" 3 "Version pulgamecanica (arosado-)" "ft_script" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+include/ft_script.h \- Educational implementation of the Unix script command (C98 standard)  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdio\&.h>\fP
+.br
+\fC#include <stdlib\&.h>\fP
+.br
+\fC#include <string\&.h>\fP
+.br
+\fC#include <time\&.h>\fP
+.br
+\fC#include <unistd\&.h>\fP
+.br
+\fC#include <fcntl\&.h>\fP
+.br
+\fC#include <sys/types\&.h>\fP
+.br
+\fC#include <sys/stat\&.h>\fP
+.br
+\fC#include <sys/wait\&.h>\fP
+.br
+\fC#include <sys/ioctl\&.h>\fP
+.br
+\fC#include <sys/select\&.h>\fP
+.br
+\fC#include <termios\&.h>\fP
+.br
+\fC#include <signal\&.h>\fP
+.br
+\fC#include <errno\&.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBscript_options\fP"
+.br
+.RI "Configuration options for the script command\&. "
+.ti -1c
+.RI "struct \fBscript_state\fP"
+.br
+.RI "Runtime state of the script session\&. "
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBDEFAULT_TYPESCRIPT\fP   'typescript'"
+.br
+.ti -1c
+.RI "#define \fBDEFAULT_SHELL\fP   '/bin/sh'"
+.br
+.ti -1c
+.RI "#define \fBBUFFER_SIZE\fP   8192"
+.br
+.ti -1c
+.RI "#define \fBEXIT_STATUS_SIGNAL_BASE\fP   128"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBparse_arguments\fP (int argc, char *argv[], \fBscript_options\fP *options)"
+.br
+.ti -1c
+.RI "void \fBprint_usage\fP (const char *program_name)"
+.br
+.ti -1c
+.RI "void \fBinit_options\fP (\fBscript_options\fP *options)"
+.br
+.ti -1c
+.RI "int \fBcreate_pty_master\fP (void)"
+.br
+.ti -1c
+.RI "const char * \fBget_pty_slave_name\fP (int master_fd)"
+.br
+.ti -1c
+.RI "pid_t \fBfork_child\fP (int master_fd, const char *slave_name, const \fBscript_options\fP *options)"
+.br
+.ti -1c
+.RI "int \fBsetup_terminal_raw_mode\fP (\fBscript_state\fP *state)"
+.br
+.ti -1c
+.RI "void \fBrestore_terminal_mode\fP (const \fBscript_state\fP *state)"
+.br
+.ti -1c
+.RI "int \fBcopy_window_size\fP (int master_fd)"
+.br
+.ti -1c
+.RI "int \fBio_loop\fP (\fBscript_state\fP *state, const \fBscript_options\fP *options)"
+.br
+.ti -1c
+.RI "int \fBopen_output_file\fP (const char *filename, int append_mode)"
+.br
+.ti -1c
+.RI "void \fBwrite_start_message\fP (int output_fd, int quiet)"
+.br
+.ti -1c
+.RI "void \fBwrite_done_message\fP (int output_fd, int quiet)"
+.br
+.ti -1c
+.RI "int \fBsetup_signal_handlers\fP (\fBscript_state\fP *state)"
+.br
+.ti -1c
+.RI "pid_t \fBcheck_child_status\fP (pid_t child_pid, int *status)"
+.br
+.ti -1c
+.RI "int \fBget_exit_code\fP (int status)"
+.br
+.ti -1c
+.RI "const char * \fBget_user_shell\fP (void)"
+.br
+.ti -1c
+.RI "int \fBwrite_all\fP (int fd, const char *data, ssize_t len, const char *error_msg)"
+.br
+.ti -1c
+.RI "char * \fBft_strcpy\fP (char *dst, const char *src)"
+.br
+.ti -1c
+.RI "char * \fBft_uitoa\fP (char *buf, unsigned int n)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Educational implementation of the Unix script command (C98 standard) 
+
+
+.PP
+\fBAuthor\fP
+.RS 4
+pulgamecanica (arosado-)
+.RE
+.PP
+This header defines the core data structures and function interfaces for ft_script, which creates a typescript of terminal sessions using pseudo-terminals (PTY)\&.
+.PP
+STANDARD: C98 (ISO/IEC 9899:1990) PLATFORM: Linux
+.SH "ARCHITECTURE OVERVIEW:"
+.PP
+The script command works by creating a pseudo-terminal (PTY) which consists of two endpoints:
+.PP
+.IP "1." 4
+MASTER side: Controlled by the parent process (our ft_script program)
+.IP "2." 4
+SLAVE side: Used by the child process (the shell or command being run)
+.PP
+.PP
+The PTY acts like a bidirectional pipe but with terminal semantics, it handles line discipline, terminal control codes, and signals\&.
+.SH "PROCESS STRUCTURE:"
+.PP
+.IP "\(bu" 2
+User Terminal
+.br
+ |
+.br
+ | (stdin/stdout)
+.br
+ v
+.br
+ [Parent Process]
+.br
+
+.IP "\(bu" 2
+Reads from user terminal stdin
+.IP "\(bu" 2
+Writes to PTY master (sends to child)
+.IP "\(bu" 2
+Reads from PTY master (receives from child)
+.IP "\(bu" 2
+Writes to user terminal stdout
+.IP "\(bu" 2
+Logs output to typescript file
+.br
+ |
+.br
+ | (PTY master/slave)
+.br
+ v
+.br
+ [Child Process]
+.br
+
+.IP "\(bu" 2
+stdin/stdout/stderr connected to PTY slave
+.IP "\(bu" 2
+Runs shell or specified command
+.IP "\(bu" 2
+Behaves as if connected to a real terminal
+.PP
+.SH "KEY SYSTEM CALLS USED:"
+.PP
+PTY Creation:
+.IP "\(bu" 2
+posix_openpt(3) or open(2) with /dev/ptmx - Creates PTY master (we use open('/dev/ptmx', O_RDWR | O_NOCTTY) directly, man 7 pty)
+.IP "\(bu" 2
+grantpt(3) - Changes ownership of slave to calling user (skipped: on modern Linux with devpts, ownership is set automatically)
+.IP "\(bu" 2
+unlockpt(3) - Unlocks the slave PTY (we use ioctl(master_fd, TIOCSPTLCK, &unlock) directly, man 2 ioctl_tty)
+.IP "\(bu" 2
+ptsname(3) - Gets the name of the slave PTY device (we use ioctl(master_fd, TIOCGPTN, &pty_num) and build '/dev/pts/N' manually)
+.PP
+.PP
+Process Management:
+.IP "\(bu" 2
+fork(2) - Creates child process
+.IP "\(bu" 2
+setsid(2) - Creates new session (child becomes session leader)
+.IP "\(bu" 2
+execve(2) - Replaces child process with shell
+.PP
+.PP
+Terminal Control:
+.IP "\(bu" 2
+tcgetattr(2) - Gets terminal attributes
+.IP "\(bu" 2
+tcsetattr(2) - Sets terminal attributes
+.IP "\(bu" 2
+ioctl(2) - Controls terminal device (TIOCSWINSZ for window size)
+.PP
+.PP
+I/O Multiplexing:
+.IP "\(bu" 2
+select(2) - Waits for multiple file descriptors to become ready
+.PP
+.PP
+Signal Handling:
+.IP "\(bu" 2
+signal(2) or sigaction(2) - Sets up signal handlers
+.IP "\(bu" 2
+SIGCHLD - Notifies when child process terminates
+.IP "\(bu" 2
+SIGWINCH - Notifies when terminal window size changes 
+.PP
+
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define BUFFER_SIZE   8192"
+Buffer size for I/O operations (8KB is a good balance)
+.IP "\(bu" 2
+Too small: excessive system calls
+.IP "\(bu" 2
+Too large: increased latency, memory usage 
+.PP
+
+.SS "#define DEFAULT_SHELL   '/bin/sh'"
+Default shell when SHELL environment variable is not set 
+.SS "#define DEFAULT_TYPESCRIPT   'typescript'"
+Default output file when no filename is specified 
+.SS "#define EXIT_STATUS_SIGNAL_BASE   128"
+Exit status when child process is terminated by signal Follows bash convention: 128 + signal_number 
+.SH "Function Documentation"
+.PP 
+.SS "pid_t check_child_status (pid_t child_pid, int * status)"
+Waits for child process and gets exit status
+.PP
+Uses waitpid() with WNOHANG to check for child termination without blocking\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIchild_pid\fP Process ID of child 
+.br
+\fIstatus\fP Output parameter for exit status
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Child PID if exited, 0 if still running, -1 on error
+.RE
+.PP
+WNOHANG: Don't block if child hasn't exited yet
+.PP
+EINTR: waitpid() can be interrupted by signals If EINTR occurs, we retry the wait, this is important because signals can interrupt waitpid() 
+.SS "int copy_window_size (int master_fd)"
+Copies window size from stdin to PTY master
+.PP
+This ensures the child process has the correct terminal dimensions\&. Uses TIOCGWINSZ to get stdin's window size and TIOCSWINSZ to set the PTY's window size\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fImaster_fd\fP PTY master file descriptor
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+0 on success, -1 on error
+.RE
+.PP
+Notes: Sets PTY window size via ioctl 
+.SS "int create_pty_master (void)"
+Creates and opens a pseudo-terminal (PTY) master
+.PP
+Uses Linux-specific PTY ioctls directly (no POSIX wrappers):
+.IP "1." 4
+open('/dev/ptmx', O_RDWR | O_NOCTTY) - opens PTY master (man 7 pty)
+.br
+ skips posix_openpt(3): equivalent, but avoids the glibc wrapper
+.IP "2." 4
+ioctl(master_fd, TIOCSPTLCK, &unlock) - unlocks slave (man 2 ioctl_tty)
+.br
+ skips grantpt(3): not needed on modern Linux devpts (kernel handles it)
+.br
+ skips unlockpt(3): replaced by the TIOCSPTLCK ioctl directly
+.PP
+.PP
+O_NOCTTY: Don't make this our controlling terminal
+.PP
+\fBReturns\fP
+.RS 4
+File descriptor of PTY master on success, -1 on error
+.RE
+.PP
+Ownership: Caller must close returned file descriptor
+.PP
+Prints error message to stderr on failure 
+.SS "pid_t fork_child (int master_fd, const char * slave_name, const \fBscript_options\fP * options)"
+Forks and sets up child process to run in PTY slave
+.PP
+Child process (pid == 0):
+.IP "1." 4
+setsid(), creates new session, child becomes session leader with no controlling terminal yet (required so that opening the slave makes it the controlling terminal automatically) (man 7 credentials)
+.IP "2." 4
+open(slave_name, O_RDWR) - opens PTY slave; because the child is now a session leader without a controlling terminal, the kernel assigns it as the controlling terminal for this session
+.IP "3." 4
+dup2(slave_fd, 0/1/2) - redirects stdin, stdout, stderr to the slave
+.IP "4." 4
+close(slave_fd) and close(master_fd) - both extra fds are no longer needed
+.IP "5." 4
+execute_shell() - exec the shell; does not return on success
+.PP
+.PP
+Parent process (pid > 0):
+.IP "\(bu" 2
+Returns child PID immediately; never touches slave_fd
+.PP
+.PP
+\fBParameters\fP
+.RS 4
+\fImaster_fd\fP PTY master file descriptor 
+.br
+\fIslave_name\fP Path to PTY slave device (e\&.g\&., '/dev/pts/0') 
+.br
+\fIoptions\fP Script options (determines what command to run)
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Child PID in parent, does not return in child (calls execve) Returns -1 on fork failure
+.RE
+.PP
+Precondition: master_fd is valid PTY master, slave_name is non-NULL 
+.SS "char * ft_strcpy (char * dst, const char * src)"
+Copies src into dst including the null terminator
+.PP
+\fBParameters\fP
+.RS 4
+\fIdst\fP Destination buffer (must be large enough for src) 
+.br
+\fIsrc\fP Null-terminated source string 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+dst
+.RE
+.PP
+Copies src into dst, including the null terminator\&. Returns dst\&. 
+.SS "char * ft_uitoa (char * buf, unsigned int n)"
+Converts an unsigned integer to its decimal string representation
+.PP
+Writes the result into buf and null-terminates it\&. Only supports non-negative values (unsigned int)\&. buf must hold at least 11 bytes (10 digits + null) to cover the full range of unsigned int (0 \&.\&. 4294967295)\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIbuf\fP Destination buffer 
+.br
+\fIn\fP Value to convert 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+buf
+.RE
+.PP
+Writes the decimal representation of n into buf and null-terminates it\&. Supports unsigned int only (no negative numbers, no sign character)\&. Returns buf\&. 
+.SS "int get_exit_code (int status)"
+Converts child wait status to exit code
+.PP
+Follows bash convention:
+.IP "\(bu" 2
+Normal exit: return child's exit code
+.IP "\(bu" 2
+Signal termination: return 128 + signal_number
+.PP
+.PP
+\fBParameters\fP
+.RS 4
+\fIstatus\fP Raw status from wait()
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Exit code to return from main() 
+.RE
+.PP
+
+.SS "const char * get_pty_slave_name (int master_fd)"
+Gets the pathname of the PTY slave device
+.PP
+Uses ioctl(master_fd, TIOCGPTN, &pty_num) to get the slave index (man 2 ioctl_tty), then manually builds the path '/dev/pts/N', skips ptsname(3)\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fImaster_fd\fP File descriptor of PTY master 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Slave device path (e\&.g\&., '/dev/pts/0') on success, NULL on error
+.RE
+.PP
+Ownership: Returned pointer is to static storage, do NOT free
+.PP
+Notes: Prints error message to stderr on failure
+.PP
+The slave name is a device path like '/dev/pts/0' or '/dev/pts/1'\&. The child process will open this device file to get access to the slave end of the PTY\&.
+.PP
+On modern Linux systems, PTY slaves are in /dev/pts/ (pts = pseudo- terminal slave)\&. Older systems used /dev/ptyXX and /dev/ttyXX\&. 
+.SS "const char * get_user_shell (void)"
+Gets the user's shell from SHELL environment variable
+.PP
+\fBReturns\fP
+.RS 4
+Shell path, or DEFAULT_SHELL if SHELL is not set
+.RE
+.PP
+Ownership: Returns pointer to environment string, do NOT free 
+.SS "void init_options (\fBscript_options\fP * options)"
+Initializes \fBscript_options\fP with default values
+.PP
+Call this before \fBparse_arguments()\fP to ensure all fields have valid defaults\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIoptions\fP Options structure to initialize (must be non-NULL) 
+.RE
+.PP
+
+.SS "int io_loop (\fBscript_state\fP * state, const \fBscript_options\fP * options)"
+Main I/O loop that copies data between terminal and PTY
+.PP
+This is the heart of the script command\&. It uses select() to multiplex between stdin and the PTY master:
+.PP
+.IP "1." 4
+stdin -> PTY master: User input goes to child (shell)
+.IP "2." 4
+PTY master -> stdout: Shell output goes to user
+.IP "3." 4
+PTY master -> output_fd: Shell output also logged to file
+.PP
+.PP
+The loop continues until:
+.IP "\(bu" 2
+Child process exits (detected by read returning 0 or SIGCHLD)
+.IP "\(bu" 2
+Error occurs on stdin or master_fd
+.PP
+.PP
+\fBParameters\fP
+.RS 4
+\fIstate\fP Script state (contains master_fd, output_fd, child_pid) 
+.br
+\fIoptions\fP Script options (determines flush behavior)
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+0 on success, -1 on error
+.RE
+.PP
+Precondition: PTY master is open, output file is open, child is running Postcondition: All I/O is complete, child has exited
+.PP
+Diagram: 
+.PP
+.nf
+stdin -----> PTY master -----> Child (shell)
+                 |
+                 v
+         +-------+-------+
+         |               |
+         v               v
+      stdout      typescript file
+
+.fi
+.PP
+ Notes:
+.IP "\(bu" 2
+Reads from stdin and master_fd
+.IP "\(bu" 2
+Writes to stdout, master_fd, and output_fd
+.IP "\(bu" 2
+May call fflush() if flush_mode is enabled 
+.PP
+
+.SS "int open_output_file (const char * filename, int append_mode)"
+Opens the typescript output file
+.PP
+\fBParameters\fP
+.RS 4
+\fIfilename\fP Output filename (or NULL for default) 
+.br
+\fIappend_mode\fP 0 to truncate, 1 to append
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+File descriptor on success, -1 on error
+.RE
+.PP
+Ownership: Caller must close returned file descriptor
+.PP
+Notes: Creates or truncates file, prints error on failure 
+.SS "int parse_arguments (int argc, char * argv[], \fBscript_options\fP * options)"
+Parses command-line arguments and populates options structure
+.PP
+Uses getopt(3) to parse command-line options in a standard way\&. This function follows the POSIX conventions for option parsing\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIargc\fP Argument count from main() 
+.br
+\fIargv\fP Argument vector from main() 
+.br
+\fIoptions\fP Output parameter for parsed options (must be non-NULL)
+.RE
+.PP
+Precondition: options must point to valid \fBscript_options\fP structure Postcondition: options is populated with parsed values
+.PP
+\fBReturns\fP
+.RS 4
+0 on success, -1 on error (invalid option or missing argument)
+.RE
+.PP
+Notes: Prints error messages to stderr on parse errors 
+.SS "void print_usage (const char * program_name)"
+Prints usage information to stderr
+.PP
+\fBParameters\fP
+.RS 4
+\fIprogram_name\fP Name of the program (usually argv[0]) 
+.RE
+.PP
+
+.SS "void restore_terminal_mode (const \fBscript_state\fP * state)"
+Restores terminal to original state (before raw mode)
+.PP
+Should be called before program exit to avoid leaving terminal in an unusable state\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIstate\fP Script state (contains original termios)
+.RE
+.PP
+Precondition: \fBsetup_terminal_raw_mode()\fP was called successfully 
+.SS "int setup_signal_handlers (\fBscript_state\fP * state)"
+Sets up signal handlers for the session
+.PP
+Handles:
+.IP "\(bu" 2
+SIGWINCH: Window size change (terminal resize)
+.PP
+.PP
+\fBParameters\fP
+.RS 4
+\fIstate\fP Script state (needed by handlers)
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+0 on success, -1 on error
+.RE
+.PP
+Notes: Installs signal handlers 
+.SS "int setup_terminal_raw_mode (\fBscript_state\fP * state)"
+Puts terminal into raw mode for character-by-character I/O
+.PP
+Raw mode disables:
+.IP "\(bu" 2
+Line buffering (ICANON)
+.IP "\(bu" 2
+Echo (ECHO)
+.IP "\(bu" 2
+Signal generation (ISIG)
+.IP "\(bu" 2
+CR/NL translation (ICRNL, ONLCR)
+.IP "\(bu" 2
+Flow control (IXON)
+.PP
+.PP
+This allows immediate character forwarding without waiting for newline\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIstate\fP Script state (stores original termios for restoration)
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+0 on success, -1 on error
+.RE
+.PP
+Precondition: stdin is a terminal (checked with isatty) Postcondition: state->original_termios contains saved attributes state->terminal_modified is set to 1
+.PP
+Notes: Modifies stdin terminal attributes 
+.SS "int write_all (int fd, const char * data, ssize_t len, const char * error_msg)"
+Write all data to file descriptor with EINTR retry
+.PP
+Helper function to ensure all data is written, handling partial writes and EINTR interruptions\&. Used throughout the codebase for reliable writes\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIfd\fP File descriptor to write to 
+.br
+\fIdata\fP Data buffer to write 
+.br
+\fIlen\fP Length of data to write 
+.br
+\fIerror_msg\fP Error message prefix for perror on failure 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+0 on success, -1 on error 
+.RE
+.PP
+
+.SS "void write_done_message (int output_fd, int quiet)"
+Writes done message to output file and stdout
+.PP
+Format: 'Script done on <timestamp>\\n'
+.PP
+\fBParameters\fP
+.RS 4
+\fIoutput_fd\fP Output file descriptor 
+.br
+\fIquiet\fP 0 to print to stdout, 1 to suppress
+.RE
+.PP
+Notes: Writes to output_fd and possibly stdout 
+.SS "void write_start_message (int output_fd, int quiet)"
+Writes start message to output file and stdout
+.PP
+Format: 'Script started on <timestamp>\\n'
+.PP
+\fBParameters\fP
+.RS 4
+\fIoutput_fd\fP Output file descriptor 
+.br
+\fIquiet\fP 0 to print to stdout, 1 to suppress
+.RE
+.PP
+Notes: Writes to output_fd and possibly stdout 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ft_script from the source code\&.
+.SH SEE ALSO
+.BR script_options (3),
+.BR script_state (3)

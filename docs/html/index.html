@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ft_script — Manual Pages</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:          #0d1117;
+      --sb-bg:       #161b22;
+      --border:      #30363d;
+      --text:        #e6edf3;
+      --muted:       #8b949e;
+      --accent:      #58a6ff;
+      --green:       #7ee787;
+      --orange:      #ffa657;
+      --red:         #ff7b72;
+      --code-bg:     #161b22;
+      --hover:       rgba(177,186,196,0.08);
+      --active-bg:   rgba(88,166,255,0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ── LAYOUT ───────────────────────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ──────────────────────────────────────────────────────────── */
+    .sidebar {
+      width: 270px;
+      min-width: 270px;
+      background: var(--sb-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sb-header {
+      padding: 28px 20px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sb-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .sb-logo-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #58a6ff22, #7ee78722);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .sb-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: -0.3px;
+    }
+
+    .sb-meta {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .sb-meta span {
+      color: var(--accent);
+    }
+
+    .sb-section-label {
+      padding: 18px 20px 6px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      margin: 1px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.12s, border-color 0.12s;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-item:hover {
+      background: var(--hover);
+    }
+
+    .nav-item.active {
+      background: var(--active-bg);
+      border-color: rgba(88,166,255,0.2);
+      color: var(--accent);
+    }
+
+    .nav-icon {
+      font-size: 13px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .nav-item.active .nav-icon { color: var(--accent); }
+
+    .nav-name {
+      font-weight: 500;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .nav-badge {
+      font-size: 10px;
+      color: var(--muted);
+      background: rgba(177,186,196,0.08);
+      border: 1px solid var(--border);
+      padding: 1px 7px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+
+    .nav-item.active .nav-badge {
+      color: var(--accent);
+      border-color: rgba(88,166,255,0.3);
+      background: rgba(88,166,255,0.1);
+    }
+
+    .sb-footer {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .sb-footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .sb-footer a:hover { text-decoration: underline; }
+
+    /* ── MAIN ─────────────────────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .topbar {
+      flex-shrink: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .topbar-sep { color: var(--border); }
+
+    #topbar-page { color: var(--text); font-weight: 500; }
+
+    .topbar-section {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .content-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 48px 64px;
+    }
+
+    .manpage-wrap {
+      max-width: 860px;
+    }
+
+    /* ── LOADING / ERROR ──────────────────────────────────────────────────── */
+    .state-msg {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 40px 0;
+    }
+
+    .state-msg::before {
+      content: '$';
+      color: var(--green);
+    }
+
+    .blink {
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* ── MAN PAGE CONTENT STYLES ──────────────────────────────────────────── */
+    .manpage-wrap h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .manpage-wrap .page-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 36px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .manpage-wrap h2 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: var(--orange);
+      margin: 36px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .manpage-wrap h2::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: var(--orange);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .manpage-wrap h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 22px 0 8px;
+      padding: 8px 12px;
+      background: rgba(88,166,255,0.06);
+      border-left: 2px solid var(--accent);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .manpage-wrap p {
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .manpage-wrap b {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .manpage-wrap i { color: var(--muted); font-style: italic; }
+
+    .manpage-wrap a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.1s;
+    }
+
+    .manpage-wrap a:hover { border-bottom-color: var(--accent); }
+
+    .manpage-wrap pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      font-size: 13px;
+      margin: 12px 0;
+      line-height: 1.6;
+    }
+
+    .manpage-wrap dl {
+      margin: 8px 0 10px 16px;
+    }
+
+    .manpage-wrap dt {
+      font-weight: 600;
+      color: #fff;
+      margin-top: 8px;
+    }
+
+    .manpage-wrap dd {
+      margin-left: 20px;
+      color: var(--text);
+    }
+
+    /* bullet list items man2html generates as DL COMPACT DT • DD */
+    .manpage-wrap dl[compact] dt,
+    .manpage-wrap dl dt:has(+ dd) {
+      color: var(--muted);
+    }
+
+    .manpage-wrap hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    /* Index section at the bottom */
+    .manpage-wrap .index-section {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .manpage-wrap .index-section h2 {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .manpage-wrap .index-section h2::before {
+      background: var(--muted);
+    }
+
+    .manpage-wrap .index-section dl {
+      margin-left: 0;
+    }
+
+    .manpage-wrap .index-section a {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .manpage-wrap .index-section a:hover {
+      color: var(--accent);
+    }
+
+    /* man2html footer */
+    .manpage-footer {
+      margin-top: 40px;
+      font-size: 11px;
+      color: var(--muted);
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* scrollbar */
+    .content-scroll::-webkit-scrollbar { width: 6px; }
+    .content-scroll::-webkit-scrollbar-track { background: transparent; }
+    .content-scroll::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sb-header">
+      <div class="sb-logo">
+        <div>
+          <div class="sb-title">ft_script</div>
+        </div>
+      </div>
+      <div class="sb-meta">
+        Unix <b>script</b>(1) re-implementation<br>
+        C98 · Linux · PTY<br>
+        <span>pulgamecanica (arosado-)</span>
+      </div>
+    </div>
+
+    <div class="sb-section-label">Manual Pages</div>
+
+    <a class="nav-item" data-file="ft_script.h.html" data-name="ft_script.h" href="#" onclick="navigate(event, this)">
+      <span class="nav-icon">§</span>
+      <span class="nav-name">ft_script.h</span>
+      <span class="nav-badge">(3)</span>
+    </a>
+    <a class="nav-item" data-file="script_options.html" data-name="script_options" href="#" onclick="navigate(event, this)">
+      <span class="nav-icon">§</span>
+      <span class="nav-name">script_options</span>
+      <span class="nav-badge">(3)</span>
+    </a>
+    <a class="nav-item" data-file="script_state.html" data-name="script_state" href="#" onclick="navigate(event, this)">
+      <span class="nav-icon">§</span>
+      <span class="nav-name">script_state</span>
+      <span class="nav-badge">(3)</span>
+    </a>
+
+    <div class="sb-footer">
+      <div>Generated · Doxygen + man2html</div>
+      <div><a href="https://github.com/pulgamecanica">github.com/pulgamecanica</a></div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ───────────────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="topbar">
+      <span>ft_script</span>
+      <span class="topbar-sep">/</span>
+      <span id="topbar-page">—</span>
+      <span class="topbar-section">Section 3 — C Library Functions</span>
+    </div>
+    <div class="content-scroll">
+      <div class="manpage-wrap" id="content">
+        <div class="state-msg">loading<span class="blink">_</span></div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  /* ── link map: CGI pattern → local html file ──────────────────────────── */
+  const PAGES = {
+    'ft_script.h':    'ft_script.h.html',
+    'script_options': 'script_options.html',
+    'script_state':   'script_state.html',
+  };
+
+  /* resolve a cgi-bin href to a local filename, or null if not a known page */
+  function resolveHref(href) {
+    const m = href.match(/\/cgi-bin\/man\/man2html\?(\d+)\+([^"&\s]+)/);
+    if (!m) return null;
+    const name = m[2];
+    return PAGES[name] || (name + '.html');
+  }
+
+  /* ── parse and clean man2html output ─────────────────────────────────── */
+  function parseManPage(raw) {
+    /* strip the leading "Content-type: ..." HTTP header line(s) */
+    const htmlStart = raw.indexOf('<!');
+    const html = htmlStart >= 0 ? raw.slice(htmlStart) : raw;
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const body = doc.body;
+
+    /* remove "Return to Main Contents" link and its surrounding HR */
+    body.querySelectorAll('a[href="/cgi-bin/man/man2html"]').forEach(a => {
+      /* remove adjacent HR if present */
+      let next = a.nextSibling;
+      while (next && (next.nodeType === 3 && !next.textContent.trim())) next = next.nextSibling;
+      if (next && next.tagName === 'HR') next.remove();
+      a.remove();
+    });
+
+    /* separate the Index section from the main content */
+    let indexEl = null;
+    body.querySelectorAll('a[name="index"]').forEach(a => {
+      indexEl = a;
+    });
+
+    /* extract page title and section line */
+    const h1 = body.querySelector('H1');
+    const titleText = h1 ? h1.textContent.trim() : '';
+    const metaNode  = h1 ? h1.nextSibling : null;
+    const metaText  = metaNode ? metaNode.textContent.trim() : '';
+    if (h1) h1.remove();
+
+    /* collect main content (everything before the index anchor) */
+    let mainHTML = '';
+    let node = body.firstChild;
+    while (node) {
+      if (node === indexEl) break;
+      if (node.tagName === 'HR' && !mainHTML.trim()) { node = node.nextSibling; continue; } /* skip leading HR */
+      mainHTML += (node.outerHTML || node.textContent);
+      node = node.nextSibling;
+    }
+
+    /* collect index content */
+    let indexHTML = '';
+    if (indexEl) {
+      let n = indexEl;
+      while (n) {
+        indexHTML += (n.outerHTML || n.textContent);
+        n = n.nextSibling;
+      }
+    }
+
+    return { titleText, metaText, mainHTML, indexHTML };
+  }
+
+  /* ── fix SEE ALSO and other cgi-bin links in the rendered container ───── */
+  function fixLinks(container) {
+    container.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+
+      /* cgi-bin man page links → local html */
+      const local = resolveHref(href);
+      if (local) {
+        a.href = '#';
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          const item = document.querySelector(`.nav-item[data-file="${local}"]`);
+          loadPage(local, item);
+        });
+        return;
+      }
+
+      /* bare /cgi-bin/man/man2html link (man2html footer) → neutralise */
+      if (href === '/cgi-bin/man/man2html') {
+        a.removeAttribute('href');
+        a.style.color = 'var(--muted)';
+      }
+    });
+  }
+
+  /* ── render a parsed page into #content ──────────────────────────────── */
+  function render(file, parsed) {
+    const { titleText, metaText, mainHTML, indexHTML } = parsed;
+    const wrap = document.getElementById('content');
+
+    wrap.innerHTML = `
+      <h1>${titleText}</h1>
+      <div class="page-meta">${metaText}</div>
+      ${mainHTML}
+      ${indexHTML ? `<div class="index-section">${indexHTML}</div>` : ''}
+    `;
+
+    fixLinks(wrap);
+    document.querySelector('.content-scroll').scrollTop = 0;
+  }
+
+  /* ── load a page by filename ──────────────────────────────────────────── */
+  function loadPage(file, navItem) {
+    /* update nav */
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    if (navItem) navItem.classList.add('active');
+
+    /* update topbar */
+    const name = navItem ? navItem.dataset.name : file.replace('.html', '');
+    document.getElementById('topbar-page').textContent = name;
+    document.title = name + ' — ft_script manual';
+
+    /* show loading */
+    document.getElementById('content').innerHTML =
+      '<div class="state-msg">loading<span class="blink">_</span></div>';
+
+    fetch(file)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(raw => render(file, parseManPage(raw)))
+      .catch(err => {
+        document.getElementById('content').innerHTML =
+          `<div class="state-msg">error loading ${file}: ${err.message}</div>`;
+      });
+  }
+
+  /* ── sidebar click handler ────────────────────────────────────────────── */
+  function navigate(event, el) {
+    event.preventDefault();
+    loadPage(el.dataset.file, el);
+  }
+
+  /* ── boot: load ft_script.h as the default page ──────────────────────── */
+  loadPage('ft_script.h.html', document.querySelector('[data-file="ft_script.h.html"]'));
+</script>
+
+</body>
+</html>

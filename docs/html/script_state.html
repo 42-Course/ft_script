@@ -1,0 +1,206 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of script_state</TITLE>
+</HEAD><BODY>
+<H1>script_state</H1>
+Section: C Library Functions (3)<BR>Updated: Version pulgamecanica (arosado-)<BR><A HREF="#index">Index</A>
+<A HREF="/cgi-bin/man/man2html">Return to Main Contents</A><HR>
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+script_state - Runtime state of the script session.  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<BR>
+
+<P>
+
+<P>
+
+#include &lt;<A HREF="file:///usr/include/ft_script.h">ft_script.h</A>&gt;
+<A NAME="lbAD">&nbsp;</A>
+<H3>Data Fields</H3>
+
+<P>
+
+<BR>
+
+int <B>master_fd</B>
+
+<BR>
+
+<BR>
+
+int <B>output_fd</B>
+
+<BR>
+
+<BR>
+
+pid_t <B>child_pid</B>
+
+<BR>
+
+<BR>
+
+int <B>child_status</B>
+
+<BR>
+
+<BR>
+
+struct termios <B>original_termios</B>
+
+<BR>
+
+<BR>
+
+int <B>terminal_modified</B>
+
+<BR>
+
+
+<A NAME="lbAE">&nbsp;</A>
+<H2>Detailed Description</H2>
+
+<P>
+
+Runtime state of the script session. 
+<P>
+This structure holds all the runtime state needed for the I/O loop. Separating state from options makes the design cleaner and easier to test.
+<P>
+
+Ownership: Created on stack or heap, cleaned up explicitly Lifetime: From PTY creation to child process termination 
+<A NAME="lbAF">&nbsp;</A>
+<H2>Field Documentation</H2>
+
+<P>
+
+<A NAME="lbAG">&nbsp;</A>
+<H3>pid_t script_state::child_pid</H3>
+
+Child process ID
+<DL COMPACT>
+<DT>&bull;<DD>
+Used to wait for child and get exit status
+<DT>&bull;<DD>
+Set by fork(), used by wait() 
+</DL>
+<P>
+
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H3>int script_state::child_status</H3>
+
+Child exit status
+<DL COMPACT>
+<DT>&bull;<DD>
+Raw status from wait()
+<DT>&bull;<DD>
+Use WIFEXITED/WEXITSTATUS/WIFSIGNALED to interpret 
+</DL>
+<P>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H3>int script_state::master_fd</H3>
+
+PTY master file descriptor
+<DL COMPACT>
+<DT>&bull;<DD>
+Used by parent to communicate with child
+<DT>&bull;<DD>
+Must be closed when session ends Ownership: We own this, must close it 
+</DL>
+<P>
+
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H3>struct termios script_state::original_termios</H3>
+
+Original terminal attributes (stdin)
+<DL COMPACT>
+<DT>&bull;<DD>
+Saved at start, restored at end
+<DT>&bull;<DD>
+Required to put terminal into raw mode and restore it Ownership: We own this data 
+</DL>
+<P>
+
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H3>int script_state::output_fd</H3>
+
+Output file descriptor (typescript file)
+<DL COMPACT>
+<DT>&bull;<DD>
+Where we log the session output
+<DT>&bull;<DD>
+Must be closed when session ends Ownership: We own this, must close it 
+</DL>
+<P>
+
+<P>
+<A NAME="lbAL">&nbsp;</A>
+<H3>int script_state::terminal_modified</H3>
+
+Flag indicating if terminal is in raw mode
+<DL COMPACT>
+<DT>&bull;<DD>
+0: normal mode
+<DT>&bull;<DD>
+1: raw mode (must restore on exit) 
+</DL>
+<P>
+
+<P>
+<P>
+<A NAME="lbAM">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for ft_script from the source code.
+<A NAME="lbAN">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="/cgi-bin/man/man2html?3+ft_script.h">ft_script.h</A></B>(3),
+
+<B><A HREF="/cgi-bin/man/man2html?3+script_options">script_options</A></B>(3)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DL>
+<DT><A HREF="#lbAD">Data Fields</A><DD>
+</DL>
+<DT><A HREF="#lbAE">Detailed Description</A><DD>
+<DT><A HREF="#lbAF">Field Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAG">pid_t script_state::child_pid</A><DD>
+<DT><A HREF="#lbAH">int script_state::child_status</A><DD>
+<DT><A HREF="#lbAI">int script_state::master_fd</A><DD>
+<DT><A HREF="#lbAJ">struct termios script_state::original_termios</A><DD>
+<DT><A HREF="#lbAK">int script_state::output_fd</A><DD>
+<DT><A HREF="#lbAL">int script_state::terminal_modified</A><DD>
+</DL>
+<DT><A HREF="#lbAM">Author</A><DD>
+<DT><A HREF="#lbAN">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:42 GMT, February 22, 2026
+</BODY>
+</HTML>

@@ -1,0 +1,1124 @@
+Content-type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of include/ft_script.h</TITLE>
+</HEAD><BODY>
+<H1>include/ft_script.h</H1>
+Section: C Library Functions (3)<BR>Updated: Version pulgamecanica (arosado-)<BR><A HREF="#index">Index</A>
+<A HREF="/cgi-bin/man/man2html">Return to Main Contents</A><HR>
+
+
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+include/ft_script.h - Educational implementation of the Unix script command (C98 standard)  
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<BR>
+
+<P>
+
+#include &lt;<A HREF="file:///usr/include/stdio.h">stdio.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/stdlib.h">stdlib.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/string.h">string.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/time.h">time.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/unistd.h">unistd.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/fcntl.h">fcntl.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/sys/types.h">sys/types.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/sys/stat.h">sys/stat.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/sys/wait.h">sys/wait.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/sys/ioctl.h">sys/ioctl.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/sys/select.h">sys/select.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/termios.h">termios.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/signal.h">signal.h</A>&gt;
+<BR>
+
+#include &lt;<A HREF="file:///usr/include/errno.h">errno.h</A>&gt;
+<BR>
+
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H3>Data Structures</H3>
+
+<P>
+
+<BR>
+
+struct <B>script_options</B>
+
+<BR>
+
+Configuration options for the script command. 
+
+<BR>
+
+struct <B>script_state</B>
+
+<BR>
+
+Runtime state of the script session. 
+
+
+<A NAME="lbAE">&nbsp;</A>
+<H3>Macros</H3>
+
+<P>
+
+<BR>
+
+#define <B>DEFAULT_TYPESCRIPT</B>   'typescript'
+
+<BR>
+
+<BR>
+
+#define <B>DEFAULT_SHELL</B>   '/bin/sh'
+
+<BR>
+
+<BR>
+
+#define <B>BUFFER_SIZE</B>   8192
+
+<BR>
+
+<BR>
+
+#define <B>EXIT_STATUS_SIGNAL_BASE</B>   128
+
+<BR>
+
+
+<A NAME="lbAF">&nbsp;</A>
+<H3>Functions</H3>
+
+<P>
+
+<BR>
+
+int <B>parse_arguments</B> (int argc, char *argv[], <B>script_options</B> *options)
+
+<BR>
+
+<BR>
+
+void <B>print_usage</B> (const char *program_name)
+
+<BR>
+
+<BR>
+
+void <B>init_options</B> (<B>script_options</B> *options)
+
+<BR>
+
+<BR>
+
+int <B>create_pty_master</B> (void)
+
+<BR>
+
+<BR>
+
+const char * <B>get_pty_slave_name</B> (int master_fd)
+
+<BR>
+
+<BR>
+
+pid_t <B>fork_child</B> (int master_fd, const char *slave_name, const <B>script_options</B> *options)
+
+<BR>
+
+<BR>
+
+int <B>setup_terminal_raw_mode</B> (<B>script_state</B> *state)
+
+<BR>
+
+<BR>
+
+void <B>restore_terminal_mode</B> (const <B>script_state</B> *state)
+
+<BR>
+
+<BR>
+
+int <B>copy_window_size</B> (int master_fd)
+
+<BR>
+
+<BR>
+
+int <B>io_loop</B> (<B>script_state</B> *state, const <B>script_options</B> *options)
+
+<BR>
+
+<BR>
+
+int <B>open_output_file</B> (const char *filename, int append_mode)
+
+<BR>
+
+<BR>
+
+void <B>write_start_message</B> (int output_fd, int quiet)
+
+<BR>
+
+<BR>
+
+void <B>write_done_message</B> (int output_fd, int quiet)
+
+<BR>
+
+<BR>
+
+int <B>setup_signal_handlers</B> (<B>script_state</B> *state)
+
+<BR>
+
+<BR>
+
+pid_t <B>check_child_status</B> (pid_t child_pid, int *status)
+
+<BR>
+
+<BR>
+
+int <B>get_exit_code</B> (int status)
+
+<BR>
+
+<BR>
+
+const char * <B>get_user_shell</B> (void)
+
+<BR>
+
+<BR>
+
+int <B>write_all</B> (int fd, const char *data, ssize_t len, const char *error_msg)
+
+<BR>
+
+<BR>
+
+char * <B>ft_strcpy</B> (char *dst, const char *src)
+
+<BR>
+
+<BR>
+
+char * <B>ft_uitoa</B> (char *buf, unsigned int n)
+
+<BR>
+
+
+<A NAME="lbAG">&nbsp;</A>
+<H2>Detailed Description</H2>
+
+<P>
+
+Educational implementation of the Unix script command (C98 standard) 
+<P>
+<P>
+<P>
+
+<B>Author</B>
+<DL COMPACT><DT><DD>
+pulgamecanica (arosado-)
+</DL>
+
+<P>
+
+This header defines the core data structures and function interfaces for ft_script, which creates a typescript of terminal sessions using pseudo-terminals (PTY).
+<P>
+
+STANDARD: C98 (ISO/IEC 9899:1990) PLATFORM: Linux
+<A NAME="lbAH">&nbsp;</A>
+<H2>ARCHITECTURE OVERVIEW:</H2>
+
+<P>
+
+The script command works by creating a pseudo-terminal (PTY) which consists of two endpoints:
+<P>
+
+<DL COMPACT>
+<DT>1.<DD>
+MASTER side: Controlled by the parent process (our ft_script program)
+<DT>2.<DD>
+SLAVE side: Used by the child process (the shell or command being run)
+</DL>
+<P>
+
+<P>
+
+The PTY acts like a bidirectional pipe but with terminal semantics, it handles line discipline, terminal control codes, and signals.
+<A NAME="lbAI">&nbsp;</A>
+<H2>PROCESS STRUCTURE:</H2>
+
+<P>
+
+<DL COMPACT>
+<DT>&bull;<DD>
+User Terminal
+<BR>
+
+<BR>&nbsp;|
+<BR>
+
+<BR>&nbsp;|&nbsp;(stdin/stdout)
+<BR>
+
+<BR>&nbsp;v
+<BR>
+
+<BR>&nbsp;[Parent&nbsp;Process]
+<BR>
+
+<P>
+<DT>&bull;<DD>
+Reads from user terminal stdin
+<DT>&bull;<DD>
+Writes to PTY master (sends to child)
+<DT>&bull;<DD>
+Reads from PTY master (receives from child)
+<DT>&bull;<DD>
+Writes to user terminal stdout
+<DT>&bull;<DD>
+Logs output to typescript file
+<BR>
+
+<BR>&nbsp;|
+<BR>
+
+<BR>&nbsp;|&nbsp;(PTY&nbsp;master/slave)
+<BR>
+
+<BR>&nbsp;v
+<BR>
+
+<BR>&nbsp;[Child&nbsp;Process]
+<BR>
+
+<P>
+<DT>&bull;<DD>
+stdin/stdout/stderr connected to PTY slave
+<DT>&bull;<DD>
+Runs shell or specified command
+<DT>&bull;<DD>
+Behaves as if connected to a real terminal
+</DL>
+<P>
+
+<A NAME="lbAJ">&nbsp;</A>
+<H2>KEY SYSTEM CALLS USED:</H2>
+
+<P>
+
+PTY Creation:
+<DL COMPACT>
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?3+posix_openpt">posix_openpt</A>(3) or <A HREF="/cgi-bin/man/man2html?2+open">open</A>(2) with /dev/ptmx - Creates PTY master (we use open('/dev/ptmx', O_RDWR | O_NOCTTY) directly, man 7 pty)
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?3+grantpt">grantpt</A>(3) - Changes ownership of slave to calling user (skipped: on modern Linux with devpts, ownership is set automatically)
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?3+unlockpt">unlockpt</A>(3) - Unlocks the slave PTY (we use ioctl(master_fd, TIOCSPTLCK, &amp;unlock) directly, man 2 ioctl_tty)
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?3+ptsname">ptsname</A>(3) - Gets the name of the slave PTY device (we use ioctl(master_fd, TIOCGPTN, &amp;pty_num) and build '/dev/pts/N' manually)
+</DL>
+<P>
+
+<P>
+
+Process Management:
+<DL COMPACT>
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?2+fork">fork</A>(2) - Creates child process
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?2+setsid">setsid</A>(2) - Creates new session (child becomes session leader)
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?2+execve">execve</A>(2) - Replaces child process with shell
+</DL>
+<P>
+
+<P>
+
+Terminal Control:
+<DL COMPACT>
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?2+tcgetattr">tcgetattr</A>(2) - Gets terminal attributes
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?2+tcsetattr">tcsetattr</A>(2) - Sets terminal attributes
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?2+ioctl">ioctl</A>(2) - Controls terminal device (TIOCSWINSZ for window size)
+</DL>
+<P>
+
+<P>
+
+I/O Multiplexing:
+<DL COMPACT>
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?2+select">select</A>(2) - Waits for multiple file descriptors to become ready
+</DL>
+<P>
+
+<P>
+
+Signal Handling:
+<DL COMPACT>
+<DT>&bull;<DD>
+<A HREF="/cgi-bin/man/man2html?2+signal">signal</A>(2) or <A HREF="/cgi-bin/man/man2html?2+sigaction">sigaction</A>(2) - Sets up signal handlers
+<DT>&bull;<DD>
+SIGCHLD - Notifies when child process terminates
+<DT>&bull;<DD>
+SIGWINCH - Notifies when terminal window size changes 
+</DL>
+<P>
+
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>Macro Definition Documentation</H2>
+
+<P>
+
+<A NAME="lbAL">&nbsp;</A>
+<H3>#define BUFFER_SIZE   8192</H3>
+
+Buffer size for I/O operations (8KB is a good balance)
+<DL COMPACT>
+<DT>&bull;<DD>
+Too small: excessive system calls
+<DT>&bull;<DD>
+Too large: increased latency, memory usage 
+</DL>
+<P>
+
+<P>
+<A NAME="lbAM">&nbsp;</A>
+<H3>#define DEFAULT_SHELL   '/bin/sh'</H3>
+
+Default shell when SHELL environment variable is not set 
+<A NAME="lbAN">&nbsp;</A>
+<H3>#define DEFAULT_TYPESCRIPT   'typescript'</H3>
+
+Default output file when no filename is specified 
+<A NAME="lbAO">&nbsp;</A>
+<H3>#define EXIT_STATUS_SIGNAL_BASE   128</H3>
+
+Exit status when child process is terminated by signal Follows bash convention: 128 + signal_number 
+<A NAME="lbAP">&nbsp;</A>
+<H2>Function Documentation</H2>
+
+<P>
+
+<A NAME="lbAQ">&nbsp;</A>
+<H3>pid_t check_child_status (pid_t child_pid, int * status)</H3>
+
+Waits for child process and gets exit status
+<P>
+
+Uses waitpid() with WNOHANG to check for child termination without blocking.
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>child_pid</I> Process ID of child 
+<BR>
+
+<I>status</I> Output parameter for exit status
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+Child PID if exited, 0 if still running, -1 on error
+</DL>
+
+<P>
+
+WNOHANG: Don't block if child hasn't exited yet
+<P>
+
+EINTR: waitpid() can be interrupted by signals If EINTR occurs, we retry the wait, this is important because signals can interrupt waitpid() 
+<A NAME="lbAR">&nbsp;</A>
+<H3>int copy_window_size (int master_fd)</H3>
+
+Copies window size from stdin to PTY master
+<P>
+
+This ensures the child process has the correct terminal dimensions. Uses TIOCGWINSZ to get stdin's window size and TIOCSWINSZ to set the PTY's window size.
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>master_fd</I> PTY master file descriptor
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+0 on success, -1 on error
+</DL>
+
+<P>
+
+Notes: Sets PTY window size via ioctl 
+<A NAME="lbAS">&nbsp;</A>
+<H3>int create_pty_master (void)</H3>
+
+Creates and opens a pseudo-terminal (PTY) master
+<P>
+
+Uses Linux-specific PTY ioctls directly (no POSIX wrappers):
+<DL COMPACT>
+<DT>1.<DD>
+open('/dev/ptmx', O_RDWR | O_NOCTTY) - opens PTY master (man 7 pty)
+<BR>
+
+<BR>&nbsp;skips&nbsp;<A HREF="/cgi-bin/man/man2html?3+posix_openpt">posix_openpt</A>(3):&nbsp;equivalent,&nbsp;but&nbsp;avoids&nbsp;the&nbsp;glibc&nbsp;wrapper
+<DT>2.<DD>
+ioctl(master_fd, TIOCSPTLCK, &amp;unlock) - unlocks slave (man 2 ioctl_tty)
+<BR>
+
+<BR>&nbsp;skips&nbsp;<A HREF="/cgi-bin/man/man2html?3+grantpt">grantpt</A>(3):&nbsp;not&nbsp;needed&nbsp;on&nbsp;modern&nbsp;Linux&nbsp;devpts&nbsp;(kernel&nbsp;handles&nbsp;it)
+<BR>
+
+<BR>&nbsp;skips&nbsp;<A HREF="/cgi-bin/man/man2html?3+unlockpt">unlockpt</A>(3):&nbsp;replaced&nbsp;by&nbsp;the&nbsp;TIOCSPTLCK&nbsp;ioctl&nbsp;directly
+</DL>
+<P>
+
+<P>
+
+O_NOCTTY: Don't make this our controlling terminal
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+File descriptor of PTY master on success, -1 on error
+</DL>
+
+<P>
+
+Ownership: Caller must close returned file descriptor
+<P>
+
+Prints error message to stderr on failure 
+<A NAME="lbAT">&nbsp;</A>
+<H3>pid_t fork_child (int master_fd, const char * slave_name, const <B>script_options</B> * options)</H3>
+
+Forks and sets up child process to run in PTY slave
+<P>
+
+Child process (pid == 0):
+<DL COMPACT>
+<DT>1.<DD>
+setsid(), creates new session, child becomes session leader with no controlling terminal yet (required so that opening the slave makes it the controlling terminal automatically) (man 7 credentials)
+<DT>2.<DD>
+open(slave_name, O_RDWR) - opens PTY slave; because the child is now a session leader without a controlling terminal, the kernel assigns it as the controlling terminal for this session
+<DT>3.<DD>
+dup2(slave_fd, 0/1/2) - redirects stdin, stdout, stderr to the slave
+<DT>4.<DD>
+close(slave_fd) and close(master_fd) - both extra fds are no longer needed
+<DT>5.<DD>
+execute_shell() - exec the shell; does not return on success
+</DL>
+<P>
+
+<P>
+
+Parent process (pid &gt; 0):
+<DL COMPACT>
+<DT>&bull;<DD>
+Returns child PID immediately; never touches slave_fd
+</DL>
+<P>
+
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>master_fd</I> PTY master file descriptor 
+<BR>
+
+<I>slave_name</I> Path to PTY slave device (e.g., '/dev/pts/0') 
+<BR>
+
+<I>options</I> Script options (determines what command to run)
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+Child PID in parent, does not return in child (calls execve) Returns -1 on fork failure
+</DL>
+
+<P>
+
+Precondition: master_fd is valid PTY master, slave_name is non-NULL 
+<A NAME="lbAU">&nbsp;</A>
+<H3>char * ft_strcpy (char * dst, const char * src)</H3>
+
+Copies src into dst including the null terminator
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>dst</I> Destination buffer (must be large enough for src) 
+<BR>
+
+<I>src</I> Null-terminated source string 
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+dst
+</DL>
+
+<P>
+
+Copies src into dst, including the null terminator. Returns dst. 
+<A NAME="lbAV">&nbsp;</A>
+<H3>char * ft_uitoa (char * buf, unsigned int n)</H3>
+
+Converts an unsigned integer to its decimal string representation
+<P>
+
+Writes the result into buf and null-terminates it. Only supports non-negative values (unsigned int). buf must hold at least 11 bytes (10 digits + null) to cover the full range of unsigned int (0 .. 4294967295).
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>buf</I> Destination buffer 
+<BR>
+
+<I>n</I> Value to convert 
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+buf
+</DL>
+
+<P>
+
+Writes the decimal representation of n into buf and null-terminates it. Supports unsigned int only (no negative numbers, no sign character). Returns buf. 
+<A NAME="lbAW">&nbsp;</A>
+<H3>int get_exit_code (int status)</H3>
+
+Converts child wait status to exit code
+<P>
+
+Follows bash convention:
+<DL COMPACT>
+<DT>&bull;<DD>
+Normal exit: return child's exit code
+<DT>&bull;<DD>
+Signal termination: return 128 + signal_number
+</DL>
+<P>
+
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>status</I> Raw status from wait()
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+Exit code to return from main() 
+</DL>
+
+<P>
+
+<P>
+<A NAME="lbAX">&nbsp;</A>
+<H3>const char * get_pty_slave_name (int master_fd)</H3>
+
+Gets the pathname of the PTY slave device
+<P>
+
+Uses ioctl(master_fd, TIOCGPTN, &amp;pty_num) to get the slave index (man 2 ioctl_tty), then manually builds the path '/dev/pts/N', skips <A HREF="/cgi-bin/man/man2html?3+ptsname">ptsname</A>(3).
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>master_fd</I> File descriptor of PTY master 
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+Slave device path (e.g., '/dev/pts/0') on success, NULL on error
+</DL>
+
+<P>
+
+Ownership: Returned pointer is to static storage, do NOT free
+<P>
+
+Notes: Prints error message to stderr on failure
+<P>
+
+The slave name is a device path like '/dev/pts/0' or '/dev/pts/1'. The child process will open this device file to get access to the slave end of the PTY.
+<P>
+
+On modern Linux systems, PTY slaves are in /dev/pts/ (pts = pseudo- terminal slave). Older systems used /dev/ptyXX and /dev/ttyXX. 
+<A NAME="lbAY">&nbsp;</A>
+<H3>const char * get_user_shell (void)</H3>
+
+Gets the user's shell from SHELL environment variable
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+Shell path, or DEFAULT_SHELL if SHELL is not set
+</DL>
+
+<P>
+
+Ownership: Returns pointer to environment string, do NOT free 
+<A NAME="lbAZ">&nbsp;</A>
+<H3>void init_options (<B>script_options</B> * options)</H3>
+
+Initializes <B>script_options</B> with default values
+<P>
+
+Call this before <B>parse_arguments()</B> to ensure all fields have valid defaults.
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>options</I> Options structure to initialize (must be non-NULL) 
+</DL>
+
+<P>
+
+<P>
+<A NAME="lbBA">&nbsp;</A>
+<H3>int io_loop (<B>script_state</B> * state, const <B>script_options</B> * options)</H3>
+
+Main I/O loop that copies data between terminal and PTY
+<P>
+
+This is the heart of the script command. It uses select() to multiplex between stdin and the PTY master:
+<P>
+
+<DL COMPACT>
+<DT>1.<DD>
+stdin -&gt; PTY master: User input goes to child (shell)
+<DT>2.<DD>
+PTY master -&gt; stdout: Shell output goes to user
+<DT>3.<DD>
+PTY master -&gt; output_fd: Shell output also logged to file
+</DL>
+<P>
+
+<P>
+
+The loop continues until:
+<DL COMPACT>
+<DT>&bull;<DD>
+Child process exits (detected by read returning 0 or SIGCHLD)
+<DT>&bull;<DD>
+Error occurs on stdin or master_fd
+</DL>
+<P>
+
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>state</I> Script state (contains master_fd, output_fd, child_pid) 
+<BR>
+
+<I>options</I> Script options (determines flush behavior)
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+0 on success, -1 on error
+</DL>
+
+<P>
+
+Precondition: PTY master is open, output file is open, child is running Postcondition: All I/O is complete, child has exited
+<P>
+
+Diagram: 
+<P>
+
+<PRE>
+stdin -----&gt; PTY master -----&gt; Child (shell)
+                 |
+                 v
+         +-------+-------+
+         |               |
+         v               v
+      stdout      typescript file
+
+</PRE>
+
+<P>
+
+<BR>&nbsp;Notes:
+<DL COMPACT>
+<DT>&bull;<DD>
+Reads from stdin and master_fd
+<DT>&bull;<DD>
+Writes to stdout, master_fd, and output_fd
+<DT>&bull;<DD>
+May call fflush() if flush_mode is enabled 
+</DL>
+<P>
+
+<P>
+<A NAME="lbBB">&nbsp;</A>
+<H3>int open_output_file (const char * filename, int append_mode)</H3>
+
+Opens the typescript output file
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>filename</I> Output filename (or NULL for default) 
+<BR>
+
+<I>append_mode</I> 0 to truncate, 1 to append
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+File descriptor on success, -1 on error
+</DL>
+
+<P>
+
+Ownership: Caller must close returned file descriptor
+<P>
+
+Notes: Creates or truncates file, prints error on failure 
+<A NAME="lbBC">&nbsp;</A>
+<H3>int parse_arguments (int argc, char * argv[], <B>script_options</B> * options)</H3>
+
+Parses command-line arguments and populates options structure
+<P>
+
+Uses <A HREF="/cgi-bin/man/man2html?3+getopt">getopt</A>(3) to parse command-line options in a standard way. This function follows the POSIX conventions for option parsing.
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>argc</I> Argument count from main() 
+<BR>
+
+<I>argv</I> Argument vector from main() 
+<BR>
+
+<I>options</I> Output parameter for parsed options (must be non-NULL)
+</DL>
+
+<P>
+
+Precondition: options must point to valid <B>script_options</B> structure Postcondition: options is populated with parsed values
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+0 on success, -1 on error (invalid option or missing argument)
+</DL>
+
+<P>
+
+Notes: Prints error messages to stderr on parse errors 
+<A NAME="lbBD">&nbsp;</A>
+<H3>void print_usage (const char * program_name)</H3>
+
+Prints usage information to stderr
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>program_name</I> Name of the program (usually argv[0]) 
+</DL>
+
+<P>
+
+<P>
+<A NAME="lbBE">&nbsp;</A>
+<H3>void restore_terminal_mode (const <B>script_state</B> * state)</H3>
+
+Restores terminal to original state (before raw mode)
+<P>
+
+Should be called before program exit to avoid leaving terminal in an unusable state.
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>state</I> Script state (contains original termios)
+</DL>
+
+<P>
+
+Precondition: <B>setup_terminal_raw_mode()</B> was called successfully 
+<A NAME="lbBF">&nbsp;</A>
+<H3>int setup_signal_handlers (<B>script_state</B> * state)</H3>
+
+Sets up signal handlers for the session
+<P>
+
+Handles:
+<DL COMPACT>
+<DT>&bull;<DD>
+SIGWINCH: Window size change (terminal resize)
+</DL>
+<P>
+
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>state</I> Script state (needed by handlers)
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+0 on success, -1 on error
+</DL>
+
+<P>
+
+Notes: Installs signal handlers 
+<A NAME="lbBG">&nbsp;</A>
+<H3>int setup_terminal_raw_mode (<B>script_state</B> * state)</H3>
+
+Puts terminal into raw mode for character-by-character I/O
+<P>
+
+Raw mode disables:
+<DL COMPACT>
+<DT>&bull;<DD>
+Line buffering (ICANON)
+<DT>&bull;<DD>
+Echo (ECHO)
+<DT>&bull;<DD>
+Signal generation (ISIG)
+<DT>&bull;<DD>
+CR/NL translation (ICRNL, ONLCR)
+<DT>&bull;<DD>
+Flow control (IXON)
+</DL>
+<P>
+
+<P>
+
+This allows immediate character forwarding without waiting for newline.
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>state</I> Script state (stores original termios for restoration)
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+0 on success, -1 on error
+</DL>
+
+<P>
+
+Precondition: stdin is a terminal (checked with isatty) Postcondition: state-&gt;original_termios contains saved attributes state-&gt;terminal_modified is set to 1
+<P>
+
+Notes: Modifies stdin terminal attributes 
+<A NAME="lbBH">&nbsp;</A>
+<H3>int write_all (int fd, const char * data, ssize_t len, const char * error_msg)</H3>
+
+Write all data to file descriptor with EINTR retry
+<P>
+
+Helper function to ensure all data is written, handling partial writes and EINTR interruptions. Used throughout the codebase for reliable writes.
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>fd</I> File descriptor to write to 
+<BR>
+
+<I>data</I> Data buffer to write 
+<BR>
+
+<I>len</I> Length of data to write 
+<BR>
+
+<I>error_msg</I> Error message prefix for perror on failure 
+</DL>
+
+<P>
+
+<B>Returns</B>
+<DL COMPACT><DT><DD>
+0 on success, -1 on error 
+</DL>
+
+<P>
+
+<P>
+<A NAME="lbBI">&nbsp;</A>
+<H3>void write_done_message (int output_fd, int quiet)</H3>
+
+Writes done message to output file and stdout
+<P>
+
+Format: 'Script done on &lt;timestamp&gt;\n'
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>output_fd</I> Output file descriptor 
+<BR>
+
+<I>quiet</I> 0 to print to stdout, 1 to suppress
+</DL>
+
+<P>
+
+Notes: Writes to output_fd and possibly stdout 
+<A NAME="lbBJ">&nbsp;</A>
+<H3>void write_start_message (int output_fd, int quiet)</H3>
+
+Writes start message to output file and stdout
+<P>
+
+Format: 'Script started on &lt;timestamp&gt;\n'
+<P>
+
+<B>Parameters</B>
+<DL COMPACT><DT><DD>
+<I>output_fd</I> Output file descriptor 
+<BR>
+
+<I>quiet</I> 0 to print to stdout, 1 to suppress
+</DL>
+
+<P>
+
+Notes: Writes to output_fd and possibly stdout 
+<A NAME="lbBK">&nbsp;</A>
+<H2>Author</H2>
+
+<P>
+
+Generated automatically by Doxygen for ft_script from the source code.
+<A NAME="lbBL">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="/cgi-bin/man/man2html?3+script_options">script_options</A></B>(3),
+
+<B><A HREF="/cgi-bin/man/man2html?3+script_state">script_state</A></B>(3)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DL>
+<DT><A HREF="#lbAD">Data Structures</A><DD>
+<DT><A HREF="#lbAE">Macros</A><DD>
+<DT><A HREF="#lbAF">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAG">Detailed Description</A><DD>
+<DT><A HREF="#lbAH">ARCHITECTURE OVERVIEW:</A><DD>
+<DT><A HREF="#lbAI">PROCESS STRUCTURE:</A><DD>
+<DT><A HREF="#lbAJ">KEY SYSTEM CALLS USED:</A><DD>
+<DT><A HREF="#lbAK">Macro Definition Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAL">#define BUFFER_SIZE   8192</A><DD>
+<DT><A HREF="#lbAM">#define DEFAULT_SHELL   '/bin/sh'</A><DD>
+<DT><A HREF="#lbAN">#define DEFAULT_TYPESCRIPT   'typescript'</A><DD>
+<DT><A HREF="#lbAO">#define EXIT_STATUS_SIGNAL_BASE   128</A><DD>
+</DL>
+<DT><A HREF="#lbAP">Function Documentation</A><DD>
+<DL>
+<DT><A HREF="#lbAQ">pid_t check_child_status (pid_t child_pid, int * status)</A><DD>
+<DT><A HREF="#lbAR">int copy_window_size (int master_fd)</A><DD>
+<DT><A HREF="#lbAS">int create_pty_master (void)</A><DD>
+<DT><A HREF="#lbAT">pid_t fork_child (int master_fd, const char * slave_name, const <B>script_options</B> * options)</A><DD>
+<DT><A HREF="#lbAU">char * ft_strcpy (char * dst, const char * src)</A><DD>
+<DT><A HREF="#lbAV">char * ft_uitoa (char * buf, unsigned int n)</A><DD>
+<DT><A HREF="#lbAW">int get_exit_code (int status)</A><DD>
+<DT><A HREF="#lbAX">const char * get_pty_slave_name (int master_fd)</A><DD>
+<DT><A HREF="#lbAY">const char * get_user_shell (void)</A><DD>
+<DT><A HREF="#lbAZ">void init_options (<B>script_options</B> * options)</A><DD>
+<DT><A HREF="#lbBA">int io_loop (<B>script_state</B> * state, const <B>script_options</B> * options)</A><DD>
+<DT><A HREF="#lbBB">int open_output_file (const char * filename, int append_mode)</A><DD>
+<DT><A HREF="#lbBC">int parse_arguments (int argc, char * argv[], <B>script_options</B> * options)</A><DD>
+<DT><A HREF="#lbBD">void print_usage (const char * program_name)</A><DD>
+<DT><A HREF="#lbBE">void restore_terminal_mode (const <B>script_state</B> * state)</A><DD>
+<DT><A HREF="#lbBF">int setup_signal_handlers (<B>script_state</B> * state)</A><DD>
+<DT><A HREF="#lbBG">int setup_terminal_raw_mode (<B>script_state</B> * state)</A><DD>
+<DT><A HREF="#lbBH">int write_all (int fd, const char * data, ssize_t len, const char * error_msg)</A><DD>
+<DT><A HREF="#lbBI">void write_done_message (int output_fd, int quiet)</A><DD>
+<DT><A HREF="#lbBJ">void write_start_message (int output_fd, int quiet)</A><DD>
+</DL>
+<DT><A HREF="#lbBK">Author</A><DD>
+<DT><A HREF="#lbBL">SEE ALSO</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 19:05:42 GMT, February 22, 2026
+</BODY>
+</HTML>

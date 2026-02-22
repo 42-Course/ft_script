@@ -1,0 +1,97 @@
+.TH "script_state" 3 "Version pulgamecanica (arosado-)" "ft_script" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+script_state \- Runtime state of the script session\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <ft_script\&.h>\fP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "int \fBmaster_fd\fP"
+.br
+.ti -1c
+.RI "int \fBoutput_fd\fP"
+.br
+.ti -1c
+.RI "pid_t \fBchild_pid\fP"
+.br
+.ti -1c
+.RI "int \fBchild_status\fP"
+.br
+.ti -1c
+.RI "struct termios \fBoriginal_termios\fP"
+.br
+.ti -1c
+.RI "int \fBterminal_modified\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Runtime state of the script session\&. 
+
+This structure holds all the runtime state needed for the I/O loop\&. Separating state from options makes the design cleaner and easier to test\&.
+.PP
+Ownership: Created on stack or heap, cleaned up explicitly Lifetime: From PTY creation to child process termination 
+.SH "Field Documentation"
+.PP 
+.SS "pid_t script_state::child_pid"
+Child process ID
+.IP "\(bu" 2
+Used to wait for child and get exit status
+.IP "\(bu" 2
+Set by fork(), used by wait() 
+.PP
+
+.SS "int script_state::child_status"
+Child exit status
+.IP "\(bu" 2
+Raw status from wait()
+.IP "\(bu" 2
+Use WIFEXITED/WEXITSTATUS/WIFSIGNALED to interpret 
+.PP
+
+.SS "int script_state::master_fd"
+PTY master file descriptor
+.IP "\(bu" 2
+Used by parent to communicate with child
+.IP "\(bu" 2
+Must be closed when session ends Ownership: We own this, must close it 
+.PP
+
+.SS "struct termios script_state::original_termios"
+Original terminal attributes (stdin)
+.IP "\(bu" 2
+Saved at start, restored at end
+.IP "\(bu" 2
+Required to put terminal into raw mode and restore it Ownership: We own this data 
+.PP
+
+.SS "int script_state::output_fd"
+Output file descriptor (typescript file)
+.IP "\(bu" 2
+Where we log the session output
+.IP "\(bu" 2
+Must be closed when session ends Ownership: We own this, must close it 
+.PP
+
+.SS "int script_state::terminal_modified"
+Flag indicating if terminal is in raw mode
+.IP "\(bu" 2
+0: normal mode
+.IP "\(bu" 2
+1: raw mode (must restore on exit) 
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for ft_script from the source code\&.
+.SH SEE ALSO
+.BR ft_script.h (3),
+.BR script_options (3)
