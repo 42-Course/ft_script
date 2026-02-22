@@ -1,4 +1,4 @@
-/**
+/*
  * -a              Append to output file instead of truncating
  * -c <command>    Execute command instead of interactive shell
  * -q              Quiet mode (no start/done messages)

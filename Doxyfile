@@ -1,0 +1,49 @@
+# Doxyfile for ft_script - generates man pages from inline Doxygen comments
+
+#---------------------------------------------------------------------------
+# Project
+#---------------------------------------------------------------------------
+PROJECT_NAME           = "ft_script"
+PROJECT_BRIEF          = "Educational implementation of the Unix script command"
+PROJECT_NUMBER         =
+OUTPUT_DIRECTORY       = docs
+CREATE_SUBDIRS         = NO
+OUTPUT_LANGUAGE        = English
+
+#---------------------------------------------------------------------------
+# Input
+#---------------------------------------------------------------------------
+INPUT                  = include src
+FILE_PATTERNS          = *.h *.c
+RECURSIVE              = NO
+EXCLUDE                =
+EXTRACT_ALL            = NO
+EXTRACT_STATIC         = YES
+EXTRACT_PRIVATE        = NO
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+
+#---------------------------------------------------------------------------
+# Build / parsing
+#---------------------------------------------------------------------------
+OPTIMIZE_OUTPUT_FOR_C  = YES
+TYPEDEF_HIDES_STRUCT   = YES
+JAVADOC_AUTOBRIEF      = NO
+
+#---------------------------------------------------------------------------
+# Output: man pages only
+#---------------------------------------------------------------------------
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_MAN           = YES
+MAN_OUTPUT             = man
+MAN_EXTENSION          = .3
+MAN_SUBDIR             =
+MAN_LINKS              = YES
+
+#---------------------------------------------------------------------------
+# Verbosity
+#---------------------------------------------------------------------------
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO

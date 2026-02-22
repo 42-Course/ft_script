@@ -24,20 +24,20 @@
  * PROCESS STRUCTURE:
  * ==================
  *
- *    User Terminal
- *         |
- *         | (stdin/stdout)
- *         v
- *   [Parent Process]
+ *    - User Terminal\n
+ *       |\n
+ *       | (stdin/stdout)\n
+ *       v\n
+ *   [Parent Process]\n
  *    - Reads from user terminal stdin
  *    - Writes to PTY master (sends to child)
  *    - Reads from PTY master (receives from child)
  *    - Writes to user terminal stdout
  *    - Logs output to typescript file
- *         |
- *         | (PTY master/slave)
- *         v
- *   [Child Process]
+ *       |\n
+ *       | (PTY master/slave)\n
+ *         v\n
+ *   [Child Process]\n
  *    - stdin/stdout/stderr connected to PTY slave
  *    - Runs shell or specified command
  *    - Behaves as if connected to a real terminal
@@ -69,10 +69,6 @@
  * - SIGCHLD - Notifies when child process terminates
  * - SIGWINCH - Notifies when terminal window size changes
  *
- * Note on openpty():
- * - openpty() is a BSD library function (section 3, not section 2)
- * - We use posix_openpt() + grantpt() + unlockpt() for POSIX compliance
- * - This is more portable and uses only standard system calls
  */
 
 #ifndef FT_SCRIPT_H
@@ -370,25 +366,10 @@ const char *get_pty_slave_name(int master_fd);
 pid_t fork_child(int master_fd, const char *slave_name,
                  const script_options *options);
 
-/**
- * Executes the user's shell or specified command in child process
- *
- * This function is called by the child after PTY setup. It builds
- * the argument vector for execve() and executes the shell.
- *
- * If options->command is set (-c flag), executes: shell -c "command"
- * Otherwise, executes interactive shell
- *
- * @param options Script options (determines what to execute)
- *
- * Precondition: Called in child process after PTY slave setup
- *
- * @return Does not return on success (process image replaced)
- *         Returns -1 only on execve() failure
- *
- * Side effects: Replaces process image, prints error on failure
+/*
+ * execute_shell - removed; logic inlined into fork_child.
+ * int execute_shell(const script_options *options);
  */
-// int execute_shell(const script_options *options);
 
 /* ========================================================================== */
 /* FUNCTION DECLARATIONS - TERMINAL CONTROL                                   */

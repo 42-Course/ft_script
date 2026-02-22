@@ -1,4 +1,4 @@
-/**
+/*
  * WHY RAW MODE?
  * For script to work correctly, we need to pass every character
  * immediately to the child without processing. If we stayed in cooked

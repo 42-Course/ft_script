@@ -1,17 +1,6 @@
 #include "ft_script.h"
 
-/**
- * Write all data to file descriptor with EINTR retry
- *
- * Ensures all data is written by looping until completion.
- * Handles partial writes and EINTR interruptions automatically.
- *
- * @param fd File descriptor to write to
- * @param data Data buffer to write
- * @param len Length of data to write
- * @param error_msg Error message prefix for perror on failure
- * @return 0 on success, -1 on error
- */
+/* Implementation of write_all — see declaration in ft_script.h */
 int write_all(int fd, const char *data, ssize_t len, const char *error_msg)
 {
     ssize_t total_written = 0;

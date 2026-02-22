@@ -40,12 +40,23 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS)
 	@echo "Compiling $<..."
 	$(CC) $(CFLAGS) -c $< -o $@
 
+docs:
+	@echo "$(GREEN)Generating man pages with Doxygen...$(RESET)"
+	doxygen Doxyfile
+	@echo "$(GREEN)Man pages written to docs/man/$(RESET)"
+	@echo "Preview with: man ./docs/man/ft_script.h.3"
+
+dclean:
+	@echo "$(RED)Removing generated docs...$(RESET)"
+	rm -rf docs
+	@echo "$(RED)Docs removed.$(RESET)"
+
 clean:
 	@echo "$(RED)Cleaning object files...$(RESET)"
 	rm -rf $(OBJ_DIR)
 	@echo "$(RED)Clean complete.$(RESET)"
 
-fclean: clean
+fclean: clean dclean
 	@echo "$(RED)Removing $(NAME)...$(RESET)"
 	rm -f $(NAME)
 	@echo "$(RED)Full clean complete.$(RESET)"
@@ -69,6 +80,8 @@ help:
 	@echo "  re      - Rebuild from scratch (fclean + all)"
 	@echo "  test    - Run a basic test"
 	@echo "  help    - Show this help message"
+	@echo "  docs    - Generate man pages with Doxygen"
+	@echo "  dclean  - Remove generated docs"
 	@echo ""
 	@echo "Usage:"
 	@echo "  make          # Build the program"
@@ -76,4 +89,4 @@ help:
 	@echo "  make fclean   # Clean everything"
 	@echo "  make re       # Rebuild from scratch"
 
-.PHONY: all clean fclean re test help
+.PHONY: all clean fclean re test help docs dclean
