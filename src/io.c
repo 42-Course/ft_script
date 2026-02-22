@@ -1,13 +1,3 @@
-/**
- *     stdin -----> PTY master -----> Child (shell)
- *                      |
- *                      v
- *              +-------+-------+
- *              |               |
- *              v               v
- *           stdout      typescript file
- */
-
 #include "ft_script.h"
 
 static int handle_stdin_input(int master_fd);
@@ -19,11 +9,9 @@ int io_loop(script_state *state, const script_options *options)
     fd_set read_fds;
     int max_fd;
     int select_result;
-    int child_exited;
 
     max_fd = (STDIN_FILENO > state->master_fd) ? STDIN_FILENO : state->master_fd;
-    child_exited = 0;
-    while (!child_exited) {
+    while (42) {
         FD_ZERO(&read_fds);
         FD_SET(STDIN_FILENO, &read_fds);
         FD_SET(state->master_fd, &read_fds);
@@ -53,7 +41,7 @@ int io_loop(script_state *state, const script_options *options)
         }
 
         if (check_child_status(state->child_pid, &state->child_status) > 0) {
-            child_exited = 1;
+            break;
         }
     }
 

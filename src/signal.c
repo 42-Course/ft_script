@@ -1,12 +1,12 @@
 #include "ft_script.h"
 
-static script_state *g_state = NULL;
+static int *g_master_fd = NULL;
 
 static void handle_sigwinch(int signum);
 
 int setup_signal_handlers(script_state *state)
 {
-    g_state = state;
+    g_master_fd = &(state->master_fd);
 
     if (signal(SIGWINCH, handle_sigwinch) == SIG_ERR) {
         perror("signal SIGWINCH");
@@ -19,7 +19,7 @@ static void handle_sigwinch(int signum)
 {
     (void)signum;
 
-    if (g_state != NULL) {
-        copy_window_size(g_state->master_fd);
+    if (g_master_fd != NULL) {
+        copy_window_size(*g_master_fd);
     }
 }

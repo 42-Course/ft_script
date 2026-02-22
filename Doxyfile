@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 PROJECT_NAME           = "ft_script"
 PROJECT_BRIEF          = "Educational implementation of the Unix script command"
-PROJECT_NUMBER         =
+PROJECT_NUMBER         = "pulgamecanica (arosado-)"
 OUTPUT_DIRECTORY       = docs
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English

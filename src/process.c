@@ -38,11 +38,15 @@ pid_t fork_child(int master_fd, const char *slave_name,
         return pid;
     }
     /*
-     * Create a new session
+     * Create a new session (man 2 setsid):
      * - Detaches from parent's controlling terminal
-     * - Child becomes session leader (no controlling terminal yet)
-     * This is required so that when we open the PTY slave, it becomes
-     * the controlling terminal for this new session. (see manual for setsid())
+     * - Child becomes session leader with NO controlling terminal yet
+     *
+     * This matters for the open() call below: man 7 credentials states
+     * "the controlling terminal is established when the session leader
+     * first opens a terminal (unless O_NOCTTY is specified)".
+     * So opening the PTY slave here (without O_NOCTTY) will automatically
+     * make it the controlling terminal for this new session.
      */
     if (setsid() == -1) {
         perror("setsid");
@@ -54,13 +58,6 @@ pid_t fork_child(int master_fd, const char *slave_name,
         exit(EXIT_FAILURE);
     }
 
-    /*
-     * Redirect stdin/stdout/stderr to the PTY slave
-     * dup2(oldfd, newfd) makes newfd a copy of oldfd
-     * - fd 0 (stdin) refers to the PTY slave
-     * - fd 1 (stdout) refers to the PTY slave
-     * - fd 2 (stderr) refers to the PTY slave
-     */
     if (dup2(slave_fd, STDIN_FILENO) == -1) {
         perror("dup2 stdin");
         exit(EXIT_FAILURE);
@@ -85,25 +82,15 @@ pid_t fork_child(int master_fd, const char *slave_name,
 }
 
 /**
- * Waits for child process and gets exit status
- *
  * WNOHANG: Don't block if child hasn't exited yet
- * - Returns 0 if child is still running
- * - Returns child PID if child has exited
- * - Returns -1 on error
  *
  * EINTR: waitpid() can be interrupted by signals
- * - If EINTR occurs, we retry the wait
- * - This is a common pattern for system calls that can be interrupted
+ * If EINTR occurs, we retry the wait, this is important because signals can interrupt waitpid()
  */
 pid_t check_child_status(pid_t child_pid, int *status)
 {
     pid_t result;
 
-    /*
-     * Loop to retry on EINTR (interrupted system call)
-     * This is important because signals can interrupt waitpid()
-     */
     do {
         result = waitpid(child_pid, status, WNOHANG);
     } while (result == -1 && errno == EINTR);
@@ -137,7 +124,7 @@ const char *get_user_shell(void)
 {
     const char *shell;
 
-    shell = getenv("SHELL");
+    shell = getenv("SHELL"); // Apparently forbidden by the guidelines, but I allow it similar to ctime
     if (shell == NULL || shell[0] == '\0') {
         shell = DEFAULT_SHELL;
     }

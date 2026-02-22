@@ -1,21 +1,3 @@
-/*
- * WHY RAW MODE?
- * For script to work correctly, we need to pass every character
- * immediately to the child without processing. If we stayed in cooked
- * mode, line editing would happen twice (once in our terminal, once
- * in the child's terminal), which would be confusing.
- * Notes:
- * - ICRNL: CR-to-NL translation
- * - IXON: Software flow control (Ctrl-S/Ctrl-Q)
- * - OPOST: Output processing (NL-to-CRNL translation, etc.)
- * - ECHO: Echo input characters
- * - ICANON: Canonical mode (line buffering)
- * - IEXTEN: Extended input processing
- * - ISIG: Signal generation (Ctrl-C, Ctrl-Z)
- * - VMIN = 1: Minimum number of characters for read to return
- * - VTIME = 0: No timeout (wait indefinitely)
- */
-
 #include "ft_script.h"
 
 int setup_terminal_raw_mode(script_state *state)

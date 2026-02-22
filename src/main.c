@@ -1,6 +1,6 @@
 #include "ft_script.h"
 
-/* Implementation of write_all — see declaration in ft_script.h */
+/* Implementation of write_all, see declaration in ft_script.h */
 int write_all(int fd, const char *data, ssize_t len, const char *error_msg)
 {
     ssize_t total_written = 0;

@@ -13,7 +13,8 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/terminal.c \
        $(SRC_DIR)/signal.c \
        $(SRC_DIR)/file.c \
-       $(SRC_DIR)/options.c
+       $(SRC_DIR)/options.c \
+       $(SRC_DIR)/utils.c
 
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
@@ -42,9 +43,28 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS)
 
 docs:
 	@echo "$(GREEN)Generating man pages with Doxygen...$(RESET)"
-	doxygen Doxyfile
+	@doxygen Doxyfile
+	@echo "$(GREEN)Adding SEE ALSO cross-references...$(RESET)"
+	@cd docs/man/man3 && \
+	REAL=$$(for f in *.3; do head -1 "$$f" | grep -q '^\.so' || echo "$${f%.3}"; done | tr '\n' ' ') && \
+	for name in $$REAL; do \
+		REFS=$$(for other in $$REAL; do \
+			[ "$$other" = "$$name" ] || echo ".BR $$other (3),"; \
+		done | sed '$$s/,$$//') && \
+		printf ".SH SEE ALSO\n%s\n" "$$REFS" >> "$$name.3"; \
+	done
 	@echo "$(GREEN)Man pages written to docs/man/$(RESET)"
-	@echo "Preview with: man ./docs/man/ft_script.h.3"
+	@echo "Preview with: man -M docs/man ft_script.h"
+
+html: docs
+	@echo "$(GREEN)Converting man pages to HTML...$(RESET)"
+	@mkdir -p docs/html
+	@for f in docs/man/man3/*.3; do \
+		head -1 "$$f" | grep -q '^\.so' && continue; \
+		name=$$(basename "$$f" .3); \
+		man2html "$$f" > "docs/html/$$name.html"; \
+	done
+	@echo "$(GREEN)HTML pages written to docs/html/$(RESET)"
 
 dclean:
 	@echo "$(RED)Removing generated docs...$(RESET)"
@@ -81,6 +101,7 @@ help:
 	@echo "  test    - Run a basic test"
 	@echo "  help    - Show this help message"
 	@echo "  docs    - Generate man pages with Doxygen"
+	@echo "  html    - Convert man pages to HTML (requires docs)"
 	@echo "  dclean  - Remove generated docs"
 	@echo ""
 	@echo "Usage:"
@@ -89,4 +110,4 @@ help:
 	@echo "  make fclean   # Clean everything"
 	@echo "  make re       # Rebuild from scratch"
 
-.PHONY: all clean fclean re test help docs dclean
+.PHONY: all clean fclean re test help docs html dclean

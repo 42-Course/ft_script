@@ -1,6 +1,7 @@
 /**
  * @file ft_script.h
  * @brief Educational implementation of the Unix script command (C98 standard)
+ * @author pulgamecanica (arosado-)
  *
  * This header defines the core data structures and function interfaces for
  * ft_script, which creates a typescript of terminal sessions using
@@ -18,7 +19,7 @@
  * 1. MASTER side: Controlled by the parent process (our ft_script program)
  * 2. SLAVE side: Used by the child process (the shell or command being run)
  *
- * The PTY acts like a bidirectional pipe but with terminal semantics - it
+ * The PTY acts like a bidirectional pipe but with terminal semantics, it
  * handles line discipline, terminal control codes, and signals.
  *
  * PROCESS STRUCTURE:
@@ -33,7 +34,7 @@
  *    - Writes to PTY master (sends to child)
  *    - Reads from PTY master (receives from child)
  *    - Writes to user terminal stdout
- *    - Logs output to typescript file
+ *    - Logs output to typescript file\n
  *       |\n
  *       | (PTY master/slave)\n
  *         v\n
@@ -47,9 +48,13 @@
  *
  * PTY Creation:
  * - posix_openpt(3) or open(2) with /dev/ptmx - Creates PTY master
+ *   (we use open("/dev/ptmx", O_RDWR | O_NOCTTY) directly, man 7 pty)
  * - grantpt(3) - Changes ownership of slave to calling user
+ *   (skipped: on modern Linux with devpts, ownership is set automatically)
  * - unlockpt(3) - Unlocks the slave PTY
+ *   (we use ioctl(master_fd, TIOCSPTLCK, &unlock) directly, man 2 ioctl_tty)
  * - ptsname(3) - Gets the name of the slave PTY device
+ *   (we use ioctl(master_fd, TIOCGPTN, &pty_num) and build "/dev/pts/N" manually)
  *
  * Process Management:
  * - fork(2) - Creates child process
@@ -79,7 +84,7 @@
 /* ========================================================================== */
 
 #include <stdio.h>      /* FILE, printf, fprintf, perror, fopen, fclose */
-#include <stdlib.h>     /* EXIT_SUCCESS, EXIT_FAILURE, malloc, free, getenv */
+#include <stdlib.h>     /* EXIT_SUCCESS, EXIT_FAILURE, getenv */
 #include <string.h>     /* strlen, strcpy, strcmp, strerror */
 #include <time.h>       /* time, ctime (explicitly allowed by project) */
 
@@ -122,11 +127,6 @@
  * - Too large: increased latency, memory usage
  */
 #define BUFFER_SIZE 8192
-
-/**
- * Maximum length for command string (-c option)
- */
-#define MAX_COMMAND_LENGTH 4096
 
 /**
  * Exit status when child process is terminated by signal
@@ -277,7 +277,7 @@ typedef struct script_state {
  *
  * @return 0 on success, -1 on error (invalid option or missing argument)
  *
- * Side effects: Prints error messages to stderr on parse errors
+ * Notes: Prints error messages to stderr on parse errors
  */
 int parse_arguments(int argc, char *argv[], script_options *options);
 
@@ -304,10 +304,12 @@ void init_options(script_options *options);
 /**
  * Creates and opens a pseudo-terminal (PTY) master
  *
- * Uses the POSIX PTY interface:
- * 1. posix_openpt(O_RDWR | O_NOCTTY) - opens PTY master
- * 2. grantpt() - changes slave ownership to calling user
- * 3. unlockpt() - unlocks the slave so it can be opened
+ * Uses Linux-specific PTY ioctls directly (no POSIX wrappers):
+ * 1. open("/dev/ptmx", O_RDWR | O_NOCTTY) - opens PTY master (man 7 pty)\n
+ *    skips posix_openpt(3): equivalent, but avoids the glibc wrapper
+ * 2. ioctl(master_fd, TIOCSPTLCK, &unlock) - unlocks slave (man 2 ioctl_tty)\n
+ *    skips grantpt(3): not needed on modern Linux devpts (kernel handles it)\n
+ *    skips unlockpt(3): replaced by the TIOCSPTLCK ioctl directly
  *
  * O_NOCTTY: Don't make this our controlling terminal
  *
@@ -315,19 +317,22 @@ void init_options(script_options *options);
  *
  * Ownership: Caller must close returned file descriptor
  *
- * Side effects: Prints error message to stderr on failure
+ * Prints error message to stderr on failure
  */
 int create_pty_master(void);
 
 /**
  * Gets the pathname of the PTY slave device
  *
+ * Uses ioctl(master_fd, TIOCGPTN, &pty_num) to get the slave index (man 2
+ * ioctl_tty), then manually builds the path "/dev/pts/N", skips ptsname(3).
+ *
  * @param master_fd File descriptor of PTY master
  * @return Slave device path (e.g., "/dev/pts/0") on success, NULL on error
  *
  * Ownership: Returned pointer is to static storage, do NOT free
  *
- * Side effects: Prints error message to stderr on failure
+ * Notes: Prints error message to stderr on failure
  */
 const char *get_pty_slave_name(int master_fd);
 
@@ -338,16 +343,19 @@ const char *get_pty_slave_name(int master_fd);
 /**
  * Forks and sets up child process to run in PTY slave
  *
- * Child process:
- * 1. Creates new session with setsid() - becomes session leader
- * 2. Opens PTY slave - becomes controlling terminal
- * 3. Redirects stdin/stdout/stderr to PTY slave
- * 4. Closes master_fd (not needed in child)
- * 5. Executes shell or command
+ * Child process (pid == 0):
+ * 1. setsid(), creates new session, child becomes session leader with no
+ *    controlling terminal yet (required so that opening the slave makes it
+ *    the controlling terminal automatically) (man 7 credentials)
+ * 2. open(slave_name, O_RDWR) - opens PTY slave; because the child is now a
+ *    session leader without a controlling terminal, the kernel assigns it as
+ *    the controlling terminal for this session
+ * 3. dup2(slave_fd, 0/1/2) - redirects stdin, stdout, stderr to the slave
+ * 4. close(slave_fd) and close(master_fd) - both extra fds are no longer needed
+ * 5. execute_shell() - exec the shell; does not return on success
  *
- * Parent process:
- * 1. Closes slave_fd (not needed in parent)
- * 2. Returns child PID
+ * Parent process (pid > 0):
+ * - Returns child PID immediately; never touches slave_fd
  *
  * @param master_fd PTY master file descriptor
  * @param slave_name Path to PTY slave device (e.g., "/dev/pts/0")
@@ -357,11 +365,6 @@ const char *get_pty_slave_name(int master_fd);
  *         Returns -1 on fork failure
  *
  * Precondition: master_fd is valid PTY master, slave_name is non-NULL
- *
- * Side effects:
- * - Child: Replaces process image with shell (does not return)
- * - Parent: Returns normally
- * - Prints error messages to stderr on failure
  */
 pid_t fork_child(int master_fd, const char *slave_name,
                  const script_options *options);
@@ -395,7 +398,7 @@ pid_t fork_child(int master_fd, const char *slave_name,
  * Postcondition: state->original_termios contains saved attributes
  *                state->terminal_modified is set to 1
  *
- * Side effects: Modifies stdin terminal attributes
+ * Notes: Modifies stdin terminal attributes
  */
 int setup_terminal_raw_mode(script_state *state);
 
@@ -422,7 +425,7 @@ void restore_terminal_mode(const script_state *state);
  *
  * @return 0 on success, -1 on error
  *
- * Side effects: Sets PTY window size via ioctl
+ * Notes: Sets PTY window size via ioctl
  */
 int copy_window_size(int master_fd);
 
@@ -452,7 +455,16 @@ int copy_window_size(int master_fd);
  * Precondition: PTY master is open, output file is open, child is running
  * Postcondition: All I/O is complete, child has exited
  *
- * Side effects:
+ * Diagram:
+ * 
+ *     stdin -----> PTY master -----> Child (shell)
+ *                      |
+ *                      v
+ *              +-------+-------+
+ *              |               |
+ *              v               v
+ *           stdout      typescript file
+ * Notes:
  * - Reads from stdin and master_fd
  * - Writes to stdout, master_fd, and output_fd
  * - May call fflush() if flush_mode is enabled
@@ -473,7 +485,7 @@ int io_loop(script_state *state, const script_options *options);
  *
  * Ownership: Caller must close returned file descriptor
  *
- * Side effects: Creates or truncates file, prints error on failure
+ * Notes: Creates or truncates file, prints error on failure
  */
 int open_output_file(const char *filename, int append_mode);
 
@@ -485,7 +497,7 @@ int open_output_file(const char *filename, int append_mode);
  * @param output_fd Output file descriptor
  * @param quiet 0 to print to stdout, 1 to suppress
  *
- * Side effects: Writes to output_fd and possibly stdout
+ * Notes: Writes to output_fd and possibly stdout
  */
 void write_start_message(int output_fd, int quiet);
 
@@ -497,7 +509,7 @@ void write_start_message(int output_fd, int quiet);
  * @param output_fd Output file descriptor
  * @param quiet 0 to print to stdout, 1 to suppress
  *
- * Side effects: Writes to output_fd and possibly stdout
+ * Notes: Writes to output_fd and possibly stdout
  */
 void write_done_message(int output_fd, int quiet);
 
@@ -509,14 +521,13 @@ void write_done_message(int output_fd, int quiet);
  * Sets up signal handlers for the session
  *
  * Handles:
- * - SIGCHLD: Child process state change (exit, stop, continue)
  * - SIGWINCH: Window size change (terminal resize)
  *
  * @param state Script state (needed by handlers)
  *
  * @return 0 on success, -1 on error
  *
- * Side effects: Installs signal handlers
+ * Notes: Installs signal handlers
  */
 int setup_signal_handlers(script_state *state);
 
@@ -571,5 +582,32 @@ const char *get_user_shell(void);
  * @return 0 on success, -1 on error
  */
 int write_all(int fd, const char *data, ssize_t len, const char *error_msg);
+
+/* ========================================================================== */
+/* FUNCTION DECLARATIONS - UTILITIES                                          */
+/* ========================================================================== */
+
+/**
+ * Copies src into dst including the null terminator
+ *
+ * @param dst Destination buffer (must be large enough for src)
+ * @param src Null-terminated source string
+ * @return dst
+ */
+char    *ft_strcpy(char *dst, const char *src);
+
+/**
+ * Converts an unsigned integer to its decimal string representation
+ *
+ * Writes the result into buf and null-terminates it.
+ * Only supports non-negative values (unsigned int).
+ * buf must hold at least 11 bytes (10 digits + null) to cover the full
+ * range of unsigned int (0 .. 4294967295).
+ *
+ * @param buf Destination buffer
+ * @param n   Value to convert
+ * @return buf
+ */
+char    *ft_uitoa(char *buf, unsigned int n);
 
 #endif /* FT_SCRIPT_H */
