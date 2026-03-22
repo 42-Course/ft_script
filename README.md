@@ -4,7 +4,7 @@ The `script` command makes a typescript of everything displayed on your terminal
 
 ---
 
-### Docs available here https://42-course.github.io/ft_script/html/
+### Docs available here [https://42-course.github.io/ft_script/html/](https://42-course.github.io/ft_script/docs/html/)
 
 ### Command-Line Options
 
